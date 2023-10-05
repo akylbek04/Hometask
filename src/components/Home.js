@@ -5,13 +5,23 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
+import { DebounceInput } from "react-debounce-input";
+
 import TableRow from "@mui/material/TableRow";
 import { Avatar } from "@mui/material";
 
+
 const columns = [
-  { id: "image", label: "Avatar", minWidth: 170 },
-  { id: "name", label: "Name", minWidth: 100 },
+  {
+    id: "image",
+    label: "Avatar",
+    minWidth: 170,
+  },
+  {
+    id: "name",
+    label: "Name",
+    minWidth: 100,
+  },
   {
     id: "species",
     label: "Species",
@@ -27,9 +37,19 @@ const columns = [
 export default function Home({ data }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [input, setInput] = useState("");
+  
+
+  const filtered = data.filter((el) => el.name.toLowerCase().includes(input.toLowerCase()))
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
+      <DebounceInput
+        minLength={3}
+        debounceTimeout={500}
+        onChange={(e) => setInput(e.target.value)}
+        value={input}
+      />
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -37,7 +57,6 @@ export default function Home({ data }) {
               {columns.map((column) => (
                 <TableCell
                   key={column.id}
-                  
                   style={{ minWidth: column.minWidth }}
                 >
                   {column.label}
@@ -47,7 +66,7 @@ export default function Home({ data }) {
           </TableHead>
           <TableBody>
             {data.length &&
-              data.map((el) => {
+              filtered.map((el) => {
                 const {
                   id,
                   name,
@@ -64,8 +83,8 @@ export default function Home({ data }) {
                     <TableCell align="right">
                       <Avatar src={image} alt={name} />
                     </TableCell>
-                    <TableCell >{name}</TableCell>
-                    <TableCell >{species}</TableCell>
+                    <TableCell>{name}</TableCell>
+                    <TableCell>{species}</TableCell>
                     <TableCell>{status}</TableCell>
                   </TableRow>
                 );
