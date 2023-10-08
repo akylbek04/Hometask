@@ -15,12 +15,16 @@ import {
   TableRow,
   Box,
   AppBar,
+  Skeleton,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PersonIcon from "@mui/icons-material/Person";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
+import CloseSharpIcon from "@mui/icons-material/CloseSharp";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 import Search from "@mui/icons-material/Search";
 import { RiAliensFill } from "react-icons/ri";
@@ -65,9 +69,9 @@ export default function Home() {
   const [activePage, setActivePage] = useState(1);
   const [rowsPerPage] = useState(5);
   const [input, setInput] = useState("");
-  const { data } = useGlobalContext();
+  const [isClicked, setIsClicked] = useState(false);
+  const { data, fetchData, loading, isDark, handleMode } = useGlobalContext();
   const totalPages = Math.ceil(data.length / rowsPerPage);
-  console.log(data, "<<<");
 
   const prev = () => {
     if (activePage > 1) {
@@ -88,11 +92,15 @@ export default function Home() {
     el.name.toLowerCase().includes(input.toLowerCase())
   );
 
+  const isShown = () => {
+    setIsClicked(!isClicked);
+  };
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
-          <Toolbar>
+          <Toolbar className={`${isDark && "dark-nav"}`}>
             <Avatar
               alt="Rick&Morty"
               src={`https://pngimg.com/d/rick_morty_PNG39.png`}
@@ -106,16 +114,29 @@ export default function Home() {
             >
               Rick&Morty API
             </Typography>
-
-            <DebounceInput
-              minLength={2}
-              debounceTimeout={500}
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              className="w-25 mx-auto my-3 border rounded p-1 ps-2"
-              placeholder="search by name..."
-            />
-            <Search className="hover"></Search>
+            {isClicked ? (
+              <>
+                <DebounceInput
+                  minLength={2}
+                  debounceTimeout={500}
+                  onChange={(e) => setInput(e.target.value)}
+                  value={input}
+                  className="w-25 mx-auto my-2 border rounded p-1 ps-2 rounded-end-0"
+                  placeholder="search by name..."
+                />
+                <CloseSharpIcon
+                  onClick={isShown}
+                  className="fs-2 bg-secondary "
+                />
+              </>
+            ) : (
+              <Search onClick={isShown} className="hover fs-3" />
+            )}
+            {isDark ? (
+              <LightModeIcon className="ms-3 fs-3 hover" onClick={handleMode} />
+            ) : (
+              <DarkModeIcon className="ms-3 fs-3 hover" onClick={handleMode} />
+            )}
           </Toolbar>
         </AppBar>
       </Box>
@@ -126,14 +147,28 @@ export default function Home() {
           borderTop: "1px solid lightgrey ",
         }}
       >
-        <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader aria-label="sticky table">
+        <TableContainer
+          sx={{
+            maxHeight: 440,
+            marginTop: !isDark && "10px",
+            backgroundColor: isDark && "#292929",
+          }}
+        >
+          <Table stickyHeader aria-label="sticky table" className="">
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
                   <TableCell
                     key={column.id}
-                    style={{ minWidth: column.minWidth, fontWeight: "600" }}
+                    style={{
+                      minWidth: column.minWidth,
+                      fontWeight: "600",
+                      borderRight: !isDark && "1px solid grey",
+                      borderRadius: !isDark && "10px",
+                      backgroundColor: isDark && "#292929",
+                      color: isDark && "#d7d7d7",
+                    }}
+                    align="center"
                   >
                     {column.label}
                   </TableCell>
@@ -156,20 +191,40 @@ export default function Home() {
                   } = el;
                   return (
                     <TableRow hover role="checkbox" key={id}>
-                      <TableCell align="right">
-                        <Avatar src={image} alt={name} />
+                      <TableCell align="center">
+                        <Tooltip title={name} placement="right">
+                          <Avatar src={image} alt={name} />
+                        </Tooltip>
                       </TableCell>
 
-                      <TableCell>
-                        <Link to={`/character/${id}`}>{name}</Link>
+                      <TableCell align="center">
+                        <Link
+                          to={`/character/${id}`}
+                          onClick={() => fetchData(id)}
+                          style={{
+                            color: isDark && "#d7d7d7",
+                          }}
+                          className={`text-left link-offset-2 link-underline link-underline-opacity-0 ${
+                            isDark ? "text-light" : "text-dark"
+                          }`}
+                        >
+                          {name}
+                        </Link>
                       </TableCell>
 
-                      <TableCell sx={{ fontSize: "22px" }}>
+                      <TableCell
+                        sx={{ fontSize: "22px" }}
+                        align="center"
+                        className={isDark && "text-light"}
+                      >
                         <Tooltip placement="top" title={species}>
                           {Species[species]}
                         </Tooltip>
                       </TableCell>
-                      <TableCell>
+                      <TableCell
+                        align="center"
+                        className={isDark && "text-light"}
+                      >
                         <Tooltip placement="top" title={status}>
                           {statuses[status]}
                         </Tooltip>
@@ -179,22 +234,65 @@ export default function Home() {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={12} align="center">
-                    No person & alien found!
-                  </TableCell>
+                  {loading ? (
+                    <>
+                      <TableCell align="center">
+                        <Skeleton variant="circular" width={40} height={40} />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Skeleton
+                          variant="text"
+                          sx={{ fontSize: "2rem", width: "200px" }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Skeleton variant="circular" width={30} height={30} />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Skeleton variant="circular" width={30} height={30} />
+                      </TableCell>
+                    </>
+                  ) : (
+                    <TableCell colSpan={12} align="center">
+                      No alien & human found!
+                    </TableCell>
+                  )}
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
-      <Button onClick={prev} disabled={activePage === 1}>
-        <ArrowBackIcon />
-      </Button>
-
-      <Button onClick={next} disabled={activePage === totalPages}>
-        <ArrowForwardIcon />
-      </Button>
+      <div className="my-4">
+        <Button
+          onClick={prev}
+          disabled={activePage === 1}
+          className={`border rounded-5 ${isDark && "bg-light"}`}
+        >
+          <ArrowBackIcon />
+        </Button>
+        {totalPages &&
+          [...Array(totalPages)].map((_, i) => {
+            return (
+              <Button
+                key={i}
+                className={`${
+                  i + 1 === activePage && "bg-secondary-subtle text-dark"
+                } border ms-1 ${isDark && " text-light"}`}
+                onClick={() => setActivePage(i + 1)}
+              >
+                {i + 1}
+              </Button>
+            );
+          })}
+        <Button
+          onClick={next}
+          className={`border rounded-5 ms-1 ${isDark && "bg-light "}`}
+          disabled={activePage === totalPages}
+        >
+          <ArrowForwardIcon />
+        </Button>
+      </div>
     </>
   );
 }
