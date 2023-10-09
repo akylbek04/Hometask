@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DebounceInput } from "react-debounce-input";
+
 import {
   Paper,
   Table,
@@ -10,11 +10,7 @@ import {
   Button,
   TableCell,
   Tooltip,
-  Typography,
-  Toolbar,
   TableRow,
-  Box,
-  AppBar,
   Skeleton,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -22,15 +18,12 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PersonIcon from "@mui/icons-material/Person";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
-import CloseSharpIcon from "@mui/icons-material/CloseSharp";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-
-import Search from "@mui/icons-material/Search";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { RiAliensFill } from "react-icons/ri";
 import { IoIosPerson } from "react-icons/io";
 import { Link } from "react-router-dom";
 import { useGlobalContext } from "../context/context";
+import Navbar from "./Navbar";
 
 const columns = [
   {
@@ -68,9 +61,7 @@ const Species = {
 export default function Home() {
   const [activePage, setActivePage] = useState(1);
   const [rowsPerPage] = useState(5);
-  const [input, setInput] = useState("");
-  const [isClicked, setIsClicked] = useState(false);
-  const { data, fetchData, loading, isDark, handleMode } = useGlobalContext();
+  const { data, fetchCharacter, loading, isDark, input } = useGlobalContext();
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
   const prev = () => {
@@ -92,54 +83,9 @@ export default function Home() {
     el.name.toLowerCase().includes(input.toLowerCase())
   );
 
-  const isShown = () => {
-    setIsClicked(!isClicked);
-  };
-
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar className={`${isDark && "dark-nav"}`}>
-            <Avatar
-              alt="Rick&Morty"
-              src={`https://pngimg.com/d/rick_morty_PNG39.png`}
-              sx={{ width: 56, height: 56 }}
-            />
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
-            >
-              Rick&Morty API
-            </Typography>
-            {isClicked ? (
-              <>
-                <DebounceInput
-                  minLength={2}
-                  debounceTimeout={500}
-                  onChange={(e) => setInput(e.target.value)}
-                  value={input}
-                  className="w-25 mx-auto my-2 border rounded p-1 ps-2 rounded-end-0"
-                  placeholder="search by name..."
-                />
-                <CloseSharpIcon
-                  onClick={isShown}
-                  className="fs-2 bg-secondary "
-                />
-              </>
-            ) : (
-              <Search onClick={isShown} className="hover fs-3" />
-            )}
-            {isDark ? (
-              <LightModeIcon className="ms-3 fs-3 hover" onClick={handleMode} />
-            ) : (
-              <DarkModeIcon className="ms-3 fs-3 hover" onClick={handleMode} />
-            )}
-          </Toolbar>
-        </AppBar>
-      </Box>
+      <Navbar />
       <Paper
         sx={{
           width: "100%",
@@ -200,15 +146,18 @@ export default function Home() {
                       <TableCell align="center">
                         <Link
                           to={`/character/${id}`}
-                          onClick={() => fetchData(id)}
+                          onClick={() => fetchCharacter(id)}
                           style={{
                             color: isDark && "#d7d7d7",
                           }}
-                          className={`text-left link-offset-2 link-underline link-underline-opacity-0 ${
-                            isDark ? "text-light" : "text-dark"
+                          className={`text-left link-offset-2 link-underline link-underline-opacity-0  ${
+                            isDark
+                              ? "text-light hover_dark"
+                              : "text-dark hover_light"
                           }`}
                         >
                           {name}
+                          <ArrowForwardIosIcon className="icon" />
                         </Link>
                       </TableCell>
 
@@ -239,21 +188,39 @@ export default function Home() {
                       <TableCell align="center">
                         <Skeleton variant="circular" width={40} height={40} />
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell className="mx-auto">
                         <Skeleton
                           variant="text"
-                          sx={{ fontSize: "2rem", width: "200px" }}
+                          sx={{
+                            fontSize: "2rem",
+                            width: "200px",
+                            margin: "auto",
+                          }}
                         />
                       </TableCell>
-                      <TableCell align="center">
-                        <Skeleton variant="circular" width={30} height={30} />
+                      <TableCell>
+                        <Skeleton
+                          variant="circular"
+                          className="mx-auto"
+                          width={30}
+                          height={30}
+                        />
                       </TableCell>
-                      <TableCell align="center">
-                        <Skeleton variant="circular" width={30} height={30} />
+                      <TableCell>
+                        <Skeleton
+                          variant="circular"
+                          className="mx-auto"
+                          width={30}
+                          height={30}
+                        />
                       </TableCell>
                     </>
                   ) : (
-                    <TableCell colSpan={12} align="center">
+                    <TableCell
+                      colSpan={12}
+                      align="center"
+                      className={isDark && "text-light"}
+                    >
                       No alien & human found!
                     </TableCell>
                   )}
