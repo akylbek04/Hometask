@@ -36,8 +36,9 @@ const Profile = () => {
   console.log(character);
 
   useEffect(() => {
+    
     fetchCharacter(id);
-  }, [id, fetchCharacter]);
+  }, [id]);
 
   return (
     <>

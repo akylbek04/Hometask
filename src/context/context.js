@@ -1,4 +1,9 @@
-import { useContext, createContext, useState, useEffect, useCallback } from "react";
+import {
+  useContext,
+  createContext,
+  useState,
+  useEffect,
+} from "react";
 
 const MyContext = createContext();
 
@@ -14,9 +19,11 @@ export const ContextProvider = ({ children }) => {
     setIsDark(!isDark);
   };
 
-  const fetchCharacter = useCallback(async (id) => {
+  const fetchCharacter = async (id) => {
     try {
-      const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`);
+      const res = await fetch(
+        `https://rickandmortyapi.com/api/character/${id}`
+      );
       if (!res.ok) throw new Error("Bad request");
       const data = await res.json();
       setCharacter(data);
@@ -24,7 +31,7 @@ export const ContextProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
     }
-  }, []);
+  };
 
   const fetchData = async () => {
     try {
