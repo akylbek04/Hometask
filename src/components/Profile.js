@@ -1,17 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useGlobalContext } from "../context/context";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import Avatar from "@mui/material/Avatar";
 import { red } from "@mui/material/colors";
-import { Badge, Button, Skeleton, Tooltip, Typography } from "@mui/material";
+import { Badge, Tooltip } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import PersonIcon from "@mui/icons-material/Person";
 import WcIcon from "@mui/icons-material/Wc";
 import VideocamIcon from "@mui/icons-material/Videocam";
@@ -23,41 +20,24 @@ import Navbar from "./Navbar";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { character, isDark, popular, loading } = useGlobalContext();
+  const { id } = useParams();
+  const { character, popular, fetchCharacter } = useGlobalContext();
   const {
-    name,
-    species,
-    status,
-    gender,
-    id,
-    origin,
-    location,
-    image,
-    episode,
+    name = "Unknown",
+    species = "Unknown",
+    status = "Unknown",
+    gender = "Unknown",
+    origin = {},
+    location = {},
+    image = "",
+    episode = [],
   } = character;
-  console.log(loading, "<- loading");
 
-  const refresh = () => {
-    window.location.reload();
-  };
+  console.log(character);
 
-  if (!Object.keys(character).length) {
-    return (
-      <div className={`wrapper ${isDark && "bg-black text-white"}`}>
-        <ErrorOutlineIcon className="icon" />
-        <p>404 Error!</p>
-        <h1>No data found</h1>
-        <div className="w-25 mx-auto d-flex justify-content-between mt-5">
-          <Button onClick={() => navigate("/")}>
-            <KeyboardBackspaceIcon />
-          </Button>
-          <Button onClick={() => refresh()}>
-            <RefreshIcon />
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    fetchCharacter(id);
+  }, [id, fetchCharacter]);
 
   return (
     <>

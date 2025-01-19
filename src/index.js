@@ -9,13 +9,11 @@ import { ContextProvider } from "./context/context";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <ContextProvider>
-      <Router>
-        <App />
-      </Router>
-    </ContextProvider>
-  </React.StrictMode>
+  <ContextProvider>
+    <Router>
+      <App />
+    </Router>
+  </ContextProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
